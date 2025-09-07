@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K-pop Playlist Generator 🎶✨</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+      overflow-x: hidden;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .header { text-align: center; margin-bottom: 40px; animation: fadeInDown 1s ease-out; }
+    .header h1 {
+      font-size: 3.5rem; font-weight: 700;
+      background: linear-gradient(45deg, #ff6b9d, #c44569);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      text-shadow: 0 4px 20px rgba(255, 107, 157, 0.3);
+    }
+    .header p { font-size: 1.2rem; color: #fff; opacity: 0.9; font-weight: 300; }
+    .controls {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      animation: fadeInUp 1s ease-out 0.2s both;
+    }
+    .control-group { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+    .control-section { flex: 1; min-width: 200px; }
+    .control-section h3 {
+      font-size: 1.1rem; color: #444; margin-bottom: 10px;
+      font-weight: 600; display: flex; align-items: center; gap: 8px;
+    }
+    select {
+      width: 100%; padding: 12px 16px;
+      border: 2px solid #e1e5e9; border-radius: 12px;
+      font-size: 1rem; background: white; color: #333;
+      transition: all 0.3s ease; cursor: pointer;
+    }
+    select:focus { outline: none; border-color: #ff6b9d; box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1); }
+    .generate-btn {
+      background: linear-gradient(45deg, #ff6b9d, #c44569); color: white; border: none;
+      padding: 15px 30px; border-radius: 25px; font-size: 1.1rem; font-weight: 600;
+      cursor: pointer; transition: all 0.3s ease;
+      box-shadow: 0 10px 20px rgba(255, 107, 157, 0.3);
+      margin: 20px auto 0; display: block;
+    }
+    .generate-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(255, 107, 157, 0.4); }
+    .playlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .track-card {
+      background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+      border-radius: 16px; padding: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease; cursor: pointer;
+      position: relative; overflow: hidden;
+    }
+    .track-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); }
+    .album-cover { width: 100%; height: 200px; border-radius: 12px; object-fit: cover; margin-bottom: 15px; }
+    .track-info { text-align: left; }
+    .track-title { font-size: 1.1rem; font-weight: 600; color: #333; margin-bottom: 5px; }
+    .track-artist { color: #666; font-size: 0.9rem; margin-bottom: 8px; }
+    .play-btn {
+      background: linear-gradient(45deg, #ff6b9d, #c44569); color: white; border: none;
+      border-radius: 50%; width: 45px; height: 45px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.3s ease;
+    }
+    .auth-section {
+      text-align: center; background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px; padding: 40px; margin-bottom: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    .auth-btn {
+      background: #1db954; color: white; border: none;
+      padding: 15px 30px; border-radius: 25px; font-size: 1.1rem; font-weight: 600;
+      cursor: pointer; transition: all 0.3s ease; box-shadow: 0 10px 20px rgba(29, 185, 84, 0.3);
+    }
+    .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(29, 185, 84, 0.4); background: #1ed760; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>K-pop Playlist Generator 🎶✨</h1>
+      <p>Discover amazing K-pop tracks based on your mood and vibe</p>
+    </div>
+
+    <div id="authSection" class="auth-section">
+      <h2>🎵 Connect to Spotify</h2>
+      <p style="margin: 20px 0; color: #666;">Connect your Spotify account to generate personalized K-pop playlists with real previews!</p>
+      <button class="auth-btn" onclick="authenticateSpotify()">🎧 Connect Spotify</button>
+    </div>
+
+    <div id="mainApp" style="display: none;">
+      <div class="controls">
+        <div class="control-group">
+          <div class="control-section">
+            <h3>😊 Mood</h3>
+            <select id="moodSelect">
+              <option value="">Select...</option>
+              <option value="happy energetic">😄 Happy</option>
+              <option value="chill relaxed">😌 Chill</option>
+              <option value="energetic powerful">⚡ Energetic</option>
+              <option value="sad emotional">😢 Sad</option>
+              <option value="romantic love">💕 Romantic</option>
+            </select>
+          </div>
+          <div class="control-section">
+            <h3>🎨 Concept</h3>
+            <select id="conceptSelect">
+              <option value="">Select...</option>
+              <option value="cute kawaii">🌸 Cute</option>
+              <option value="fierce powerful">🔥 Fierce</option>
+              <option value="retro vintage">🕺 Retro</option>
+              <option value="dreamy ethereal">☁️ Dreamy</option>
+              <option value="dark mysterious">🖤 Dark</option>
+            </select>
+          </div>
+          <div class="control-section">
+            <h3>🌿 Season</h3>
+            <select id="seasonSelect">
+              <option value="">Select...</option>
+              <option value="summer tropical">☀️ Summer</option>
+              <option value="winter cozy">❄️ Winter</option>
+              <option value="spring fresh">🌱 Spring</option>
+              <option value="autumn fall">🍂 Fall</option>
+            </select>
+          </div>
+        </div>
+        <button class="generate-btn" onclick="generatePlaylist()">✨ Generate Playlist ✨</button>
+      </div>
+      <div id="playlist" class="playlist"></div>
+    </div>
+  </div>
+
+  <script>
+    // ===== CONFIG =====
+    const CLIENT_ID = "9738f4282c9b4019b378f8d68b43cffa";  // Replace with your Client ID
+    const REDIRECT_URI = "https://kmaanasar.github.io/K-Pop-Playlist-Generator/"; // Or your live URL
+    const SCOPES = "user-read-private user-read-email playlist-modify-public";
+    let accessToken = null;
+
+    // ===== PKCE Helpers =====
+    function generateCodeVerifier(length) {
+      let text = '';
+      let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+      for (let i = 0; i < length; i++) text += possible.charAt(Math.floor(Math.random() * possible.length));
+      return text;
+    }
+    async function generateCodeChallenge(codeVerifier) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(codeVerifier);
+      const digest = await crypto.subtle.digest("SHA-256", data);
+      return btoa(String.fromCharCode(...new Uint8Array(digest)))
+        .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    }
+
+    // ===== Auth Flow =====
+    async function authenticateSpotify() {
+      const codeVerifier = generateCodeVerifier(128);
+      const codeChallenge = await generateCodeChallenge(codeVerifier);
+      localStorage.setItem("code_verifier", codeVerifier);
+
+      const authUrl = new URL("https://accounts.spotify.com/authorize");
+      authUrl.searchParams.append("client_id", CLIENT_ID);
+      authUrl.searchParams.append("response_type", "code");
+      authUrl.searchParams.append("redirect_uri", REDIRECT_URI);
+      authUrl.searchParams.append("scope", SCOPES);
+      authUrl.searchParams.append("code_challenge_method", "S256");
+      authUrl.searchParams.append("code_challenge", codeChallenge);
+
+      window.location.href = authUrl.toString();
+    }
+
+    window.addEventListener("load", async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get("code");
+      if (code) {
+        const codeVerifier = localStorage.getItem("code_verifier");
+        const body = new URLSearchParams();
+        body.append("client_id", CLIENT_ID);
+        body.append("grant_type", "authorization_code");
+        body.append("code", code);
+        body.append("redirect_uri", REDIRECT_URI);
+        body.append("code_verifier", codeVerifier);
+
+        const response = await fetch("https://accounts.spotify.com/api/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body
+        });
+        const data = await response.json();
+        accessToken = data.access_token;
+
+        document.getElementById("authSection").style.display = "none";
+        document.getElementById("mainApp").style.display = "block";
+
+        window.history.replaceState({}, document.title, REDIRECT_URI);
+      }
+    });
+
+    // ===== Playlist Generator =====
+    async function generatePlaylist() {
+      const mood = document.getElementById("moodSelect").value;
+      const concept = document.getElementById("conceptSelect").value;
+      const season = document.getElementById("seasonSelect").value;
+      if (!mood && !concept && !season) {
+        alert("Pick at least one option! 🎵"); return;
+      }
+      const query = buildSearchQuery(mood, concept, season);
+      const tracks = await searchKpopTracks(query, 8);
+      displayPlaylist(tracks);
+    }
+
+    async function searchKpopTracks(query, limit) {
+      const res = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=${limit}`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      const data = await res.json();
+      return data.tracks.items;
+    }
+
+    function buildSearchQuery(mood, concept, season) {
+      const parts = [];
+      if (mood) parts.push(mood);
+      if (concept) parts.push(concept);
+      if (season) parts.push(season);
+      parts.push("kpop");
+      return parts.join(" ");
+    }
+
+    function displayPlaylist(tracks) {
+      const playlist = document.getElementById("playlist");
+      playlist.innerHTML = "";
+      tracks.forEach(track => {
+        const div = document.createElement("div");
+        div.className = "track-card";
+        div.innerHTML = `
+          <img src="${track.album.images[0]?.url}" class="album-cover">
+          <div class="track-info">
+            <div class="track-title">${track.name}</div>
+            <div class="track-artist">${track.artists.map(a=>a.name).join(", ")}</div>
+            <button class="play-btn" onclick="window.open('${track.external_urls.spotify}', '_blank')">▶️</button>
+          </div>`;
+        playlist.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
