@@ -22,6 +22,7 @@ body {
   font-size:3rem;
   font-weight:700;
   background: linear-gradient(45deg, #ffb3ba, #ffdfba, #ffffba, #baffc9, #bae1ff);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 4px 20px rgba(0,0,0,0.1);
@@ -162,28 +163,14 @@ select:focus { outline:none; box-shadow:0 0 0 3px rgba(255,182,193,0.3); }
 <script>
 const CLIENT_ID = "9738f4282c9b4019b378f8d68b43cffa";  // Replace with your Client ID
 const REDIRECT_URI = "https://kmaanasar.github.io/K-Pop-Playlist-Generator/"; // Or your live URL
-const SCOPES = "user-read-private user-read-email";
+const SCOPES="user-read-private user-read-email";
 let accessToken=null,currentAudio=null,playingTrackId='';
 const kpopKeywords=['BTS','BLACKPINK','TWICE','ITZY','aespa','Red Velvet','MAMAMOO','SEVENTEEN','Stray Kids','ENHYPEN','TXT','IVE','NewJeans','LE SSERAFIM','NMIXX','EVERGLOW','ATEEZ','NCT','IU','EXO','SHINee'];
 
-function generateCodeVerifier(length){
-  let text='',chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-  for(let i=0;i<length;i++) text+=chars.charAt(Math.floor(Math.random()*chars.length));
-  return text;
-}
-async function generateCodeChallenge(v){
-  const data=new TextEncoder().encode(v);
-  const digest=await crypto.subtle.digest('SHA-256',data);
-  return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-}
-function authenticateSpotify(){
-  const verifier=generateCodeVerifier(128);
-  sessionStorage.setItem('code_verifier',verifier);
-  generateCodeChallenge(verifier).then(challenge=>{
-    const url=`https://accounts.spotify.com/authorize?response_type=code&client_id=${CLIENT_ID}&scope=${encodeURIComponent(SCOPES)}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&code_challenge_method=S256&code_challenge=${challenge}`;
-    window.location=url;
-  });
-}
+function generateCodeVerifier(length){let text='',chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';for(let i=0;i<length;i++) text+=chars.charAt(Math.floor(Math.random()*chars.length)); return text;}
+async function generateCodeChallenge(v){const data=new TextEncoder().encode(v); const digest=await crypto.subtle.digest('SHA-256',data); return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function authenticateSpotify(){const verifier=generateCodeVerifier(128); sessionStorage.setItem('code_verifier',verifier); generateCodeChallenge(verifier).then(challenge=>{const url=`https://accounts.spotify.com/authorize?response_type=code&client_id=${CLIENT_ID}&scope=${encodeURIComponent(SCOPES)}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&code_challenge_method=S256&code_challenge=${challenge}`; window.location=url;});}
+
 window.onload=function(){
   const params=new URLSearchParams(window.location.search);
   const code=params.get('code');
@@ -219,24 +206,24 @@ async function generatePlaylist(){
   document.getElementById('loading').style.display='none';
 }
 
+// Updated to enforce K-pop strictly
 function buildSearchQueries(mood,concept,season){
   const artists=kpopKeywords.sort(()=>0.5-Math.random()).slice(0,3);
-  return artists.map(a=>{
+  return artists.map(artist=>{
     let parts=[];
     if(mood) parts.push(mood);
     if(concept) parts.push(concept);
     if(season) parts.push(season);
-    parts.push(a); parts.push('kpop');
+    parts.push(`artist:${artist}`);
+    parts.push('genre:k-pop');
     return parts.join(' ');
   });
 }
 
 async function searchKpopTracks(query,limit=10){
-  if(!accessToken) return generateSamplePlaylist(); 
+  if(!accessToken) return generateSamplePlaylist();
   try{
-    const res=await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=${limit}`,{
-      headers:{'Authorization':`Bearer ${accessToken}`}
-    });
+    const res=await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=${limit}`,{headers:{'Authorization':`Bearer ${accessToken}`}});
     const data=await res.json();
     return data.tracks.items;
   }catch(e){return generateSamplePlaylist();}
