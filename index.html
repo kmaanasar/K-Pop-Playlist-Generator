@@ -358,7 +358,7 @@
         
         const CLIENT_ID = "7cf87153ad1742ca9b098e0d63d55db0";
         const REDIRECT_URI = "https://kmaanasar.github.io/K-Pop-Playlist-Generator/";
-        const SCOPES = "user-read-private user-read-email";
+        const SCOPES = "playlist-modify-public playlist-modify-private user-read-private user-read-email";
         let accessToken = null;
         let currentAudio = null;
         let playingTrackId = '';
@@ -498,70 +498,64 @@
             return [
                 { id: '1', name: 'Dynamite', artists: [{ name: 'BTS' }], album: { images: [{ url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop' }] }, preview_url: null },
                 { id: '2', name: 'How You Like That', artists: [{ name: 'BLACKPINK' }], album: { images: [{ url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=300&fit=crop' }] }, preview_url: null },
-                { id: '3', name: 'FANCY', artists: [{ name: 'TWICE' }], album: { images: [{ url: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=300&h=300&fit=crop' }] }, preview_url: null }
+                { id: '3', name: 'FANCY', artists: [{ name: 'TWICE' }], album: { images: [{ url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop' }] }, preview_url: null }
             ];
         }
 
         function displayPlaylist(tracks) {
-            const container = document.getElementById('playlist'); 
+            const container = document.getElementById('playlist');
             container.innerHTML = '';
             
-            tracks.forEach(t => {
-                const card = document.createElement('div'); 
+            tracks.forEach(track => {
+                const card = document.createElement('div');
                 card.className = 'track-card';
                 card.innerHTML = `
-                    <img src="${t.album.images[0]?.url}" class="album-cover">
-                    <div class="track-info">
-                        <div class="track-title">${t.name}</div>
-                        <div class="track-artist">${t.artists.map(a => a.name).join(', ')}</div>
-                        <button class="play-btn" onclick="togglePlay('${t.id}','${t.preview_url}')">
-                            <span id="play-icon-${t.id}">▶️</span>
-                        </button>
-                    </div>
+                    <img src="${track.album.images[0].url}" class="album-cover">
+                    <div class="track-title">${track.name}</div>
+                    <div class="track-artist">${track.artists.map(a => a.name).join(', ')}</div>
+                    <button class="play-btn" data-preview="${track.preview_url || ''}" data-id="${track.id}">
+                        ▶
+                    </button>
                 `;
                 container.appendChild(card);
             });
+            
+            document.querySelectorAll('.play-btn').forEach(btn => {
+                btn.onclick = () => togglePreview(btn);
+            });
         }
 
-        function togglePlay(id, url) {
-            if (playingTrackId === id) { 
-                currentAudio?.pause(); 
-                document.getElementById(`play-icon-${id}`).textContent = '▶️'; 
-                playingTrackId = ''; 
+        function togglePreview(button) {
+            const previewUrl = button.dataset.preview;
+            const trackId = button.dataset.id;
+            
+            if (!previewUrl) { 
+                alert('Preview not available for this track.'); 
                 return; 
             }
             
-            if (currentAudio) { 
-                currentAudio.pause(); 
-                document.getElementById(`play-icon-${playingTrackId}`).textContent = '▶️'; 
-            }
-            
-            if (url) { 
-                currentAudio = new Audio(url); 
-                currentAudio.play(); 
+            if (currentAudio && playingTrackId === trackId) {
+                currentAudio.pause();
+                currentAudio = null;
+                playingTrackId = '';
+                button.textContent = '▶';
+            } else {
+                if (currentAudio) {
+                    currentAudio.pause();
+                    document.querySelectorAll('.play-btn').forEach(btn => btn.textContent = '▶');
+                }
+                currentAudio = new Audio(previewUrl);
+                currentAudio.play();
+                playingTrackId = trackId;
+                button.textContent = '⏸';
+                
                 currentAudio.onended = () => {
-                    document.getElementById(`play-icon-${id}`).textContent = '▶️'; 
+                    button.textContent = '▶';
+                    currentAudio = null;
                     playingTrackId = '';
-                }; 
-                document.getElementById(`play-icon-${id}`).textContent = '⏸️'; 
-                playingTrackId = id; 
-            } else { 
-                document.getElementById(`play-icon-${id}`).textContent = '⏸️'; 
-                playingTrackId = id; 
-                setTimeout(() => {
-                    document.getElementById(`play-icon-${id}`).textContent = '▶️'; 
-                    playingTrackId = '';
-                }, 3000);
+                };
             }
         }
-
-        // Final check after everything loads
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔧 DOM Content Loaded');
-            const funcExists = typeof authenticateSpotify === 'function';
-            console.log('Final check - authenticateSpotify function exists:', funcExists ? 'function' : 'undefined');
-            updateDebugInfo('DOM loaded - Function check: ' + (funcExists ? 'PASS' : 'FAIL'));
-        });
     </script>
 </body>
 </html>
