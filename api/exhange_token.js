@@ -1,6 +1,20 @@
 import fetch from 'node-fetch';
 
 export default async function handler(req, res) {
+    // Enable CORS for your GitHub Pages frontend
+    res.setHeader('Access-Control-Allow-Origin', 'https://kmaanasar.github.io');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    // Handle preflight request
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+
     const { code, redirect_uri } = req.body;
 
     const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
