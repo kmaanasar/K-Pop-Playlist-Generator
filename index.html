@@ -407,6 +407,19 @@
             const hash = window.location.hash;
             console.log('🔗 URL hash:', hash);
             
+            // Check for errors first
+            if (hash.includes("error=")) {
+                const errorType = new URLSearchParams(hash.substring(1)).get("error");
+                console.error('❌ Spotify Auth Error:', errorType);
+                updateDebugInfo('❌ Spotify Auth Error: ' + errorType);
+                
+                if (errorType === 'unsupported_response_type') {
+                    updateDebugInfo('💡 Solution: Check your Spotify App settings - make sure it supports Web API');
+                    updateDebugInfo('💡 Your app may be configured for mobile/desktop only');
+                }
+                return;
+            }
+            
             if (hash.includes("access_token")) {
                 console.log('✅ Access token found in URL');
                 accessToken = new URLSearchParams(hash.substring(1)).get("access_token");
