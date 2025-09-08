@@ -389,8 +389,8 @@
         let playingTrackId = '';
 
         // Spotify configuration
-        const CLIENT_ID = 'your_spotify_client_id'; // Replace with your Spotify Client ID
-        const REDIRECT_URI = window.location.origin + window.location.pathname;
+        const CLIENT_ID = "9738f4282c9b4019b378f8d68b43cffa"; // Replace with your Spotify Client ID
+        const REDIRECT_URI = "https://kmaanasar.github.io/K-Pop-Playlist-Generator/";
         const SCOPES = 'user-read-private user-read-email';
 
         // K-pop artist keywords for better search results
@@ -518,49 +518,57 @@
         }
 
         function displayPlaylist(tracks) {
-            const playlistContainer = document.getElementById('playlist');
+            const container = document.getElementById('playlist'); 
+            container.innerHTML = '';
             
-            tracks.forEach(track => {
-                const trackCard = document.createElement('div');
-                trackCard.className = 'track-card';
-                
-                trackCard.innerHTML = `
-                    <img src="${track.album.images[0]?.url || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop'}" 
-                         alt="${track.name}" class="album-cover">
+            tracks.forEach(t => {
+                const card = document.createElement('div'); 
+                card.className = 'track-card';
+                card.innerHTML = `
+                    <img src="${t.album.images[0]?.url}" class="album-cover">
                     <div class="track-info">
-                        <div class="track-title">${track.name}</div>
-                        <div class="track-artist">${track.artists.map(artist => artist.name).join(', ')}</div>
-                        <button class="play-btn" onclick="togglePlay('${track.id}', '${track.preview_url}')">
-                            <span id="play-icon-${track.id}">▶️</span>
+                        <div class="track-title">${t.name}</div>
+                        <div class="track-artist">${t.artists.map(a => a.name).join(', ')}</div>
+                        <button class="play-btn" onclick="togglePlay('${t.id}','${t.preview_url}')">
+                            <span id="play-icon-${t.id}">▶️</span>
                         </button>
                     </div>
                 `;
-                
-                playlistContainer.appendChild(trackCard);
+                container.appendChild(card);
             });
         }
 
-        function togglePlay(trackId, previewUrl) {
-            if (playingTrackId === trackId) {
-                // Stop current track
-                if (currentAudio) {
-                    currentAudio.pause();
-                    currentAudio = null;
-                }
-                document.getElementById(`play-icon-${trackId}`).textContent = '▶️';
-                playingTrackId = '';
-            } else {
-                // Stop any currently playing track
-                if (currentAudio) {
-                    currentAudio.pause();
-                    document.getElementById(`play-icon-${playingTrackId}`).textContent = '▶️';
-                }
-
-                if (previewUrl) {
-                    // Play new track
-                    currentAudio = new Audio(previewUrl);
-                    currentAudio.play();
-                    currentAudio.onended = () => {
+        function togglePlay(id, url) {
+            if (playingTrackId === id) { 
+                currentAudio?.pause(); 
+                document.getElementById(`play-icon-${id}`).textContent = '▶️'; 
+                playingTrackId = ''; 
+                return; 
+            }
+            
+            if (currentAudio) { 
+                currentAudio.pause(); 
+                document.getElementById(`play-icon-${playingTrackId}`).textContent = '▶️'; 
+            }
+            
+            if (url) { 
+                currentAudio = new Audio(url); 
+                currentAudio.play(); 
+                currentAudio.onended = () => {
+                    document.getElementById(`play-icon-${id}`).textContent = '▶️'; 
+                    playingTrackId = '';
+                }; 
+                document.getElementById(`play-icon-${id}`).textContent = '⏸️'; 
+                playingTrackId = id; 
+            } else { 
+                document.getElementById(`play-icon-${id}`).textContent = '⏸️'; 
+                playingTrackId = id; 
+                setTimeout(() => {
+                    document.getElementById(`play-icon-${id}`).textContent = '▶️'; 
+                    playingTrackId = '';
+                }, 3000);
+            }
+        } () => {
                         document.getElementById(`play-icon-${trackId}`).textContent = '▶️';
                         playingTrackId = '';
                     };
