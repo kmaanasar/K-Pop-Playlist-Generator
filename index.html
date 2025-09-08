@@ -270,6 +270,16 @@
                 gap: 15px;
             }
         }
+
+        .debug-info {
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -277,6 +287,11 @@
         <div class="header">
             <h1>K-pop Playlist Generator 🎶✨</h1>
             <p>Discover amazing K-pop tracks based on your mood and vibe</p>
+        </div>
+
+        <div class="debug-info">
+            <strong>Debug Info:</strong><br>
+            <span id="debugInfo">Loading...</span>
         </div>
 
         <div id="authSection" class="auth-section">
@@ -338,6 +353,9 @@
     </div>
 
     <script>
+        // Debug logging
+        console.log('🔧 Script loading...');
+        
         const CLIENT_ID = "9738f4282c9b4019b378f8d68b43cffa";
         const REDIRECT_URI = "https://kmaanasar.github.io/K-Pop-Playlist-Generator/";
         const SCOPES = "user-read-private user-read-email";
@@ -352,20 +370,55 @@
         ];
 
         function authenticateSpotify() {
-            console.log('authenticateSpotify called!'); // Test if function is called
+            console.log('🎵 authenticateSpotify called!');
+            console.log('🔗 CLIENT_ID:', CLIENT_ID);
+            console.log('🔗 REDIRECT_URI:', REDIRECT_URI);
+            
             const url = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(SCOPES)}`;
-            console.log('Redirecting to:', url); // Debug log
-            window.location.href = url;
+            console.log('🚀 Redirecting to:', url);
+            
+            try {
+                window.location.href = url;
+                console.log('✅ Redirect initiated');
+            } catch (error) {
+                console.error('❌ Redirect failed:', error);
+                updateDebugInfo('Redirect failed: ' + error.message);
+            }
+        }
+
+        function updateDebugInfo(message) {
+            const debugEl = document.getElementById('debugInfo');
+            if (debugEl) {
+                debugEl.innerHTML += '<br>' + new Date().toLocaleTimeString() + ': ' + message;
+            }
         }
 
         // Parse access token from URL hash
         window.onload = () => {
+            console.log('🔧 Window loaded');
+            
+            // Check if function exists
+            const funcExists = typeof authenticateSpotify === 'function';
+            console.log('authenticateSpotify function exists:', funcExists ? 'function' : 'undefined');
+            
+            updateDebugInfo('authenticateSpotify function exists: ' + (funcExists ? 'YES' : 'NO'));
+            updateDebugInfo('Current URL: ' + window.location.href);
+            
             const hash = window.location.hash;
+            console.log('🔗 URL hash:', hash);
+            
             if (hash.includes("access_token")) {
+                console.log('✅ Access token found in URL');
                 accessToken = new URLSearchParams(hash.substring(1)).get("access_token");
+                console.log('🎵 Access token:', accessToken ? 'Retrieved' : 'Failed to parse');
+                
                 document.getElementById('authSection').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
                 window.history.replaceState({}, document.title, window.location.pathname);
+                
+                updateDebugInfo('✅ Authenticated successfully');
+            } else {
+                updateDebugInfo('No access token in URL - need to authenticate');
             }
         };
 
@@ -488,6 +541,14 @@
                 }, 3000);
             }
         }
+
+        // Final check after everything loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 DOM Content Loaded');
+            const funcExists = typeof authenticateSpotify === 'function';
+            console.log('Final check - authenticateSpotify function exists:', funcExists ? 'function' : 'undefined');
+            updateDebugInfo('DOM loaded - Function check: ' + (funcExists ? 'PASS' : 'FAIL'));
+        });
     </script>
 </body>
 </html>
