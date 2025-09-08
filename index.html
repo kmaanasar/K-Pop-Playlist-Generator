@@ -352,8 +352,10 @@
         ];
 
         function authenticateSpotify() {
+            console.log('authenticateSpotify called!'); // Test if function is called
             const url = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${encodeURIComponent(SCOPES)}`;
-            window.location = url;
+            console.log('Redirecting to:', url); // Debug log
+            window.location.href = url;
         }
 
         // Parse access token from URL hash
